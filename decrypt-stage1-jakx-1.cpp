@@ -3,7 +3,38 @@
 #include <vector>
 #include "minilzo.h"
 
-int main() {
+enum ELF_TYPE: unsigned int{
+    US,
+    PAL
+};
+
+constexpr const auto US_ELF_FILENAME = "SCUS_974.29";
+constexpr const auto PAL_ELF_FILENAME = "SCES_532.86";
+constexpr const auto DEFAULT_ELF = US_ELF_FILENAME;
+int main(int argc, char **argv) {
+
+    std::string elfName;
+    ELF_TYPE elfType;
+    if(argc < 2){
+        elfName = DEFAULT_ELF;
+        std::cout << "No ELF file specified, defaulting to " << DEFAULT_ELF << std::endl;
+    }
+    else{
+        elfName = argv[1];
+    }
+
+    if(elfName == US_ELF_FILENAME){
+        elfType = US;
+    }
+    else if(elfName == PAL_ELF_FILENAME){
+        elfType = PAL;
+    }
+    else{
+        elfType = US;
+        std::cerr << "ELF file not named " << US_ELF_FILENAME << " or " << PAL_ELF_FILENAME << "." << std::endl;
+        std::cerr << "Assuming it is SCUS_974.29" << std::endl;
+    }
+
     // Initialize LZO
     if (lzo_init() != LZO_E_OK) {
         std::cerr << "LZO initialization failed" << std::endl;
@@ -11,7 +42,7 @@ int main() {
     }
 
     // Read the entire ELF file
-    std::ifstream input{ "./game-elf", std::ios::binary };
+    std::ifstream input{ elfName, std::ios::binary };
     if (!input) {
         std::cerr << "Failed to open input file" << std::endl;
         return 1;
@@ -22,18 +53,19 @@ int main() {
     input.close();
 
     // Extract the compressed portion
-    // if ntsc
-    // const size_t compressed_offset = 0x166ab4 - 0x100000;
-    // const size_t compressed_size = 0x88f9f;
-    // elif pal
-    const size_t compressed_offset = 0x16bbc4 - 0x100000;
-    const size_t compressed_size = 0x89002;
-
-    // size found in previous execution using a too large buffer
-    // if ntsc
-    // const size_t expected_decompressed_size = 0x170CA4;
-    // elif pal
-    const size_t expected_decompressed_size = 0x170DA4; // idk
+    size_t compressed_offset;
+    size_t compressed_size;
+    size_t expected_decompressed_size;
+    if(elfType == US){
+        compressed_offset = 0x166ab4 - 0x100000;
+        compressed_size = 0x88f9f;
+        expected_decompressed_size = 0x170CA4;
+    }
+    else{ //elfType == PAL
+        compressed_offset = 0x16bbc4 - 0x100000;
+        compressed_size = 0x89002;
+        expected_decompressed_size = 0x170DA4;
+    }
     
     if (elf_data.size() < compressed_offset + compressed_size) {
         std::cerr << "ELF file is smaller than expected" << std::endl;
@@ -70,9 +102,10 @@ int main() {
     decompressed_data.resize(decompressed_size);
 
     // Write the decompressed ELF
-    std::ofstream output("./decrypted-elf", std::ios::binary);
+    std::string output_elf = "decrypted-" + elfName;
+    std::ofstream output(output_elf, std::ios::binary);
     if (!output) {
-        std::cerr << "Failed to open output file" << std::endl;
+        std::cerr << "Failed to open output file " << output_elf << std::endl;
         return 1;
     }
 
@@ -81,6 +114,6 @@ int main() {
 
     output.close();
 
-    std::cout << "Decompression completed successfully" << std::endl;
+    std::cout << "Decompression to " << output_elf << " completed successfully" << std::endl;
     return 0;
 }
