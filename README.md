@@ -1,10 +1,41 @@
-# Jak X ELF decryption
+# Jak X ELF Decompression
 
-Jak X's ELF is encrypted, which makes it challenging to work with the ISO's ELF. For now, the memory must be dumped by running PCSX2, but it also dumps goal code with that. That's not the biggest problem, but it'd be nice to work in a smaller search space to match functions!
+Jak X's ELF is compressed, which makes it challenging to work with the ISO's ELF. This project creates a program that can  decompress the ELF
+file, making it easier to decompile.
+
+## Building the project
+
+You can build the project using g++ by using:
+```sh
+make g++
+```
+or using clang++ by using:
+```sh
+make clang++
+```
+At some point this project could be updated to make building easier on Windows but this is what we have for now.
+
+## Running the project.
+
+You can run the project by using:
+```sh
+./decrypt-stage1-jakx-1 SCUS_974.29   # or SCES_532.86, if decompiling a PAL .ELF
+```
+The program will output `decrypted-SCUS_974.29` or `decrypted-SCES_532.86` if you provide a Jak X ELF
+as the first argument without changing its name.
+If a first argument is given but it doesn't match `SCUS_974.29` or `SCES_532.86`, the program
+will assume that the given file is a renamed copy of `SCUS_974.29`,
+and will output `decrypted-<filename>`, where `<filename>` is the first argument.
+If no filename is provided, the program will attempt to decrypt (decompress) `SCUS_974.29`.
+
+## IMPORTANT NOTE
+
+The rest of this README contains old notes (which could be out of date) by the original author of this project, Yodaxtah.
+[Here](https://github.com/yodaxtah/jak-x-elf-decryption) is a link to their original project.
 
 ## LZO1x compression
 
-The encryption is actually simply a compression and decompression algorithm, called LZO compression. The compression is probably integrated in the build/release/publish process as a post-operation, and the decompression is run immediately when the ELF is executed. For decompression, `lzo1x_decompress` is called, which supposedly has the following signature:
+The ELF files are compressed using LZO compression. The compression is probably integrated in the build/release/publish process as a post-operation, and the decompression is run immediately when the ELF is executed. For decompression, `lzo1x_decompress` is called, which supposedly has the following signature:
 
 ```c++
 int lzo1x_decompress (byte * src, uint src_len, byte * dst, uint * dst_len, void * wrkmem);
