@@ -19,7 +19,7 @@ At some point this project could be updated to make building easier on Windows b
 
 You can run the project by using:
 ```sh
-./decrypt-stage1-jakx-1 SCUS_974.29   # or SCES_532.86, if decompiling a PAL .ELF
+./decrypt-jakx-elf SCUS_974.29   # or SCES_532.86, if decompiling a PAL .ELF
 ```
 The program will output `decrypted-SCUS_974.29` or `decrypted-SCES_532.86` if you provide a Jak X ELF
 as the first argument without changing its name.

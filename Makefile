@@ -1,5 +1,5 @@
-PROGRAM = decrypt-stage1-jakx-1
-SOURCES = decrypt-stage1-jakx-1.cpp minilzo.c 
+PROGRAM = decrypt-jakx-elf
+SOURCES = decrypt-jakx-elf.cpp minilzo.c 
 
 default:
 	@echo ""
